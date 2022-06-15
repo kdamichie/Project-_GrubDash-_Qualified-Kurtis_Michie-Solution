@@ -6,13 +6,11 @@ const dishes = require(path.resolve("src/data/dishes-data"));
 // Use this function to assign ID's when necessary
 const nextId = require("../utils/nextId");
 
-// TODO: Implement the /dishes handlers needed to make the tests pass
-
 // <------ Validation Middleware ------>
 
 // Check that dish exists
 function dishExists(req, res, next) {
-  const { dishId } = req.params
+  const { dishId } = req.params;
   const foundDish = dishes.find((dish) => dish.id === dishId);
 
   if (foundDish) {
@@ -21,7 +19,7 @@ function dishExists(req, res, next) {
   }
   next({
     status: 404,
-    message: `Dish does not exists: ${dishId}.`
+    message: `Dish does not exists: ${dishId}.`,
   });
 }
 
@@ -60,7 +58,8 @@ function dishPriceValidation(req, res, next) {
   }
   next({
     status: 400,
-    message: "'price' property is invalid or missing. 'price' must be integers and greater than 0",
+    message:
+      "'price' property is invalid or missing. 'price' must be integers and greater than 0",
   });
 }
 
@@ -77,22 +76,64 @@ function dishImageUrlValidation(req, res, next) {
   });
 }
 
+// Check that id is found in db
+function dishIdMatch(req, res, next) {
+  const { dishId } = req.params;
+  let {
+    data: { id },
+  } = req.body;
+
+  // If dish.id is missing, empty, null, or undefined, set dish.id to params id
+  if (!id) {
+    id = dishId;
+  }
+
+  if (dishId === id) {
+    return next();
+  }
+  next({
+    status: 400,
+    message: `Dish id does not match route id. Dish: ${id}, Route: ${dishId}`,
+  });
+}
+
 // <------ Route Handlers ------>
 // create, read, update, and list
 
 // Create a new dish
 function create(req, res) {
+  const { data: { name, description, price, image_url } = {} } = req.body;
+  const id = nextId();
 
+  const newDish = {
+    id,
+    name,
+    description,
+    price,
+    image_url,
+  };
+  dishes.push(newDish);
+
+  res.status(201).json({ data: newDish });
 }
 
 // Retrieve dish by id
 function read(req, res) {
-
+  res.json({ data: res.locals.dish });
 }
 
 // Update dish by id
 function update(req, res) {
+  const dish = res.locals.dish;
+  const { data: { name, description, price, image_url } = {} } = req.body;
 
+  // Update dish
+  dish.name = name;
+  dish.description = description;
+  dish.price = price;
+  dish.image_url = image_url;
+
+  res.json({ data: dish });
 }
 
 // List all dishes
@@ -100,11 +141,25 @@ function list(req, res) {
   res.json({ data: dishes });
 }
 
- // Export Route Handlers
- module.exports = {
+// Export Route Handlers
+module.exports = {
   list,
   dishExists,
-  create: [isDishProvided, create],
+  create: [
+    dishNameValidation,
+    dishDescriptionValidation,
+    dishPriceValidation,
+    dishImageUrlValidation,
+    create,
+  ],
   read: [dishExists, read],
-  update: [dishExists, isDishProvided, update],
- }
+  update: [
+    dishExists,
+    dishIdMatch,
+    dishNameValidation,
+    dishDescriptionValidation,
+    dishPriceValidation,
+    dishImageUrlValidation,
+    update,
+  ],
+};
