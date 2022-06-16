@@ -64,10 +64,14 @@ function orderDishValidation(req, res, next) {
 
 // Check that quantity is provided, is an integer, and is greater than 0
 function orderQuantityValidation(req, res, next) {
-  const { data: { dishes } = {} } = req.body
+  const { data: { dishes } = {} } = req.body;
 
   dishes.map((dish, index) => {
-    if (!dish.quantity || !Number.isInteger(dish.quantity) || dish.quantity <= 0) {
+    if (
+      !dish.quantity ||
+      !Number.isInteger(dish.quantity) ||
+      dish.quantity <= 0
+    ) {
       return next({
         status: 400,
         message: `Dish ${index} must have a quantity that is an integer greater than 0.`,
@@ -81,9 +85,7 @@ function orderQuantityValidation(req, res, next) {
 // Check that id is found in db
 function orderIdMatch(req, res, next) {
   const { orderId } = req.params;
-  let {
-    data: { id },
-  } = req.body;
+  let { data: { id } } = req.body;
 
   // If order.id is missing, empty, null, or undefined, set order.id to params id
   if (!id) {
@@ -115,10 +117,10 @@ function orderStatusCheckVerification(req, res, next) {
     default:
       next({
         status: 400,
-        message: "Order must have a status of pending, preparing, out-for-delivery, delivered."
+        message:
+          "Order must have a status of pending, preparing, out-for-delivery, delivered",
       });
   }
-
   next();
 }
 
@@ -168,8 +170,19 @@ function list(req, res) {
 
 // Delete order
 function destroy(req, res, next) {
+  const { orderId } = req.params;
   const order = res.locals.order;
-  
+
+  if (order.status === "pending") {
+    const index = orders.findIndex((order) => order.id === orderId);
+    orders.splice(index, 1);
+
+    res.sendStatus(204);
+  }
+  next({
+    status: 400,
+    message: "An order cannot be deleted unless it is pending"
+  });
 }
 
 module.exports = {
@@ -180,7 +193,7 @@ module.exports = {
     orderMobileNumberToValidation,
     orderDishValidation,
     orderQuantityValidation,
-    create
+    create,
   ],
   read: [orderExists, read],
   update: [
@@ -191,12 +204,10 @@ module.exports = {
     orderDishValidation,
     orderQuantityValidation,
     orderStatusCheckVerification,
-    update
+    update,
   ],
   delete: [
     orderExists,
-    orderIdMatch,
-    orderStatusCheckVerification,
     destroy
-  ]
-}
+  ],
+};
