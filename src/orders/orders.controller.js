@@ -19,7 +19,7 @@ function orderExists(req, res, next) {
   }
   next({
     status: 404,
-    message: `Order does not exists: ${orderId}.`,
+    message: `Order does not exists: ${orderId}.`
   });
 }
 
@@ -32,7 +32,7 @@ function orderDeliveryToValidation(req, res, next) {
   }
   next({
     status: 400,
-    message: "Order must include a deliverTo",
+    message: "Order must include a deliverTo."
   });
 }
 
@@ -45,7 +45,7 @@ function orderMobileNumberToValidation(req, res, next) {
   }
   next({
     status: 400,
-    message: "Order must include a mobileNumber",
+    message: "Order must include a mobileNumber."
   });
 }
 
@@ -58,7 +58,7 @@ function orderDishValidation(req, res, next) {
   }
   next({
     status: 400,
-    message: "Order must include at least one dish",
+    message: "Order must include at least one dish."
   });
 }
 
@@ -74,11 +74,10 @@ function orderQuantityValidation(req, res, next) {
     ) {
       return next({
         status: 400,
-        message: `Dish ${index} must have a quantity that is an integer greater than 0.`,
+        message: `Dish ${index} must have a quantity that is an integer greater than 0.`
       });
     }
   });
-
   next();
 }
 
@@ -97,7 +96,7 @@ function orderIdMatch(req, res, next) {
   }
   next({
     status: 400,
-    message: `Order id does not match route id. Order: ${id}, Route: ${orderId}.`,
+    message: `Order id does not match route id. Order: ${id}, Route: ${orderId}.`
   });
 }
 
@@ -118,7 +117,7 @@ function orderStatusCheckVerification(req, res, next) {
       next({
         status: 400,
         message:
-          "Order must have a status of pending, preparing, out-for-delivery, delivered",
+          "Order must have a status of pending, preparing, out-for-delivery, delivered."
       });
   }
   next();
@@ -176,12 +175,11 @@ function destroy(req, res, next) {
   if (order.status === "pending") {
     const index = orders.findIndex((order) => order.id === orderId);
     orders.splice(index, 1);
-
     res.sendStatus(204);
   }
   next({
     status: 400,
-    message: "An order cannot be deleted unless it is pending"
+    message: "An order cannot be deleted unless it is pending."
   });
 }
 
@@ -206,8 +204,5 @@ module.exports = {
     orderStatusCheckVerification,
     update,
   ],
-  delete: [
-    orderExists,
-    destroy
-  ],
+  delete: [orderExists, destroy],
 };

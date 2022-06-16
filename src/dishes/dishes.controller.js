@@ -19,7 +19,7 @@ function dishExists(req, res, next) {
   }
   next({
     status: 404,
-    message: `Dish does not exists: ${dishId}.`,
+    message: `Dish does not exists: ${dishId}.`
   });
 }
 
@@ -32,7 +32,7 @@ function dishNameValidation(req, res, next) {
   }
   next({
     status: 400,
-    message: "No 'name' property provided",
+    message: "Dish must include a name."
   });
 }
 
@@ -45,7 +45,7 @@ function dishDescriptionValidation(req, res, next) {
   }
   next({
     status: 400,
-    message: "No 'description' property provided",
+    message: "Dish must include a description."
   });
 }
 
@@ -59,7 +59,7 @@ function dishPriceValidation(req, res, next) {
   next({
     status: 400,
     message:
-      "'price' property is invalid or missing. 'price' must be integers and greater than 0",
+      "Dish must include a price. Dish must have a price that is an integer greater than 0."
   });
 }
 
@@ -72,16 +72,14 @@ function dishImageUrlValidation(req, res, next) {
   }
   next({
     status: 400,
-    message: "No 'image_url' property provided",
+    message: "Dish must include a image_url."
   });
 }
 
 // Check that id is found in db
 function dishIdMatch(req, res, next) {
   const { dishId } = req.params;
-  let {
-    data: { id },
-  } = req.body;
+  let { data: { id } } = req.body;
 
   // If dish.id is missing, empty, null, or undefined, set dish.id to params id
   if (!id) {
@@ -93,7 +91,7 @@ function dishIdMatch(req, res, next) {
   }
   next({
     status: 400,
-    message: `Dish id does not match route id. Dish: ${id}, Route: ${dishId}`,
+    message: `Dish id does not match route id. Dish: ${id}, Route: ${dishId}.`
   });
 }
 
